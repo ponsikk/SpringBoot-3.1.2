@@ -1,197 +1,134 @@
 package com.example.demo.service;
 
-import com.example.demo.repository.UserDao;
-import com.example.demo.users.User;
+import com.example.demo.entity.Role;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 @Service
-public class UserService implements UserDao {
+public class UserService implements UserDetailsService {
+
+
+    @Qualifier("userRepository")
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
-    private UserDao userDao;
+    private PasswordEncoder passwordEncoder;
 
+    @PostConstruct
+    public void init() {
+        // Проверяем и добавляем пользователя с ролью USER
+        if (userRepository.findByUsername("user").isEmpty()) {
+            User user = new User();
+            user.setUsername("user");
+            user.setFirstName("Ivan");
+            user.setLastName("Userov");
+            user.setEmail("user@email.com");
+
+            String encodedPassword = passwordEncoder.encode("userpass");
+            user.setPassword(encodedPassword);
+            user.setRoles(Set.of(Role.ROLE_USER));
+
+            userRepository.save(user);
+        }
+
+        // Проверяем и добавляем администратора с ролью ADMIN
+        if (userRepository.findByUsername("admin").isEmpty()) {
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setFirstName("Anna");
+            admin.setLastName("Adminova");
+            admin.setEmail("admin@email.com");
+
+            String encodedPassword = passwordEncoder.encode("adminpass");
+            admin.setPassword(encodedPassword);
+            admin.setRoles(Set.of(Role.ROLE_ADMIN));
+
+            userRepository.save(admin);
+        }
+
+        // Проверяем и добавляем пользователя с обеими ролями (USER и ADMIN)
+        if (userRepository.findByUsername("superuser").isEmpty()) {
+            User superuser = new User();
+            superuser.setUsername("superuser");
+            superuser.setFirstName("Super");
+            superuser.setLastName("User");
+            superuser.setEmail("superuser@email.com");
+
+            String encodedPassword = passwordEncoder.encode("superpass");
+            superuser.setPassword(encodedPassword);
+            superuser.setRoles(Set.of(Role.ROLE_USER, Role.ROLE_ADMIN));
+
+            userRepository.save(superuser);
+        }
+
+        // Проверяем и добавляем ещё одного пользователя с ролью USER
+        if (userRepository.findByUsername("guest").isEmpty()) {
+            User guest = new User();
+            guest.setUsername("guest");
+            guest.setFirstName("Guest");
+            guest.setLastName("Guestov");
+            guest.setEmail("guest@email.com");
+
+            String encodedPassword = passwordEncoder.encode("guestpass");
+            guest.setPassword(encodedPassword);
+            guest.setRoles(Set.of(Role.ROLE_GUEST));
+
+            userRepository.save(guest);
+        }
+    }
+
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    }
 
     public List<User> getAllUsers() {
-        return userDao.findAll();
+        return userRepository.findAll();
     }
 
 
     public Optional<User> getUserById(Long id) {
-        return userDao.findById(id);
+        return userRepository.findById(id);
     }
 
 
     public User addUser(User user) {
-        return userDao.save(user);
+        return userRepository.save(user);
     }
 
 
     public User updateUser(User user) {
-        return userDao.save(user);
+        return userRepository.save(user);
     }
 
 
     public void deleteUser(Long id) {
-        userDao.deleteById(id);
+        userRepository.deleteById(id);
     }
 
-    @Override
-    public <S extends User> S save(S entity) {
-        return null;
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
-    @Override
-    public <S extends User> List<S> saveAll(Iterable<S> entities) {
-        return List.of();
-    }
-
-    @Override
-    public List<User> findAll() {
-        return List.of();
-    }
-
-    @Override
-    public List<User> findAllById(Iterable<Long> longs) {
-        return List.of();
-    }
-
-    @Override
-    public long count() {
-        return 0;
-    }
-
-    @Override
-    public void deleteById(Long aLong) {
-
-    }
-
-    @Override
-    public void delete(User entity) {
-
-    }
-
-    @Override
-    public void deleteAllById(Iterable<? extends Long> longs) {
-
-    }
-
-    @Override
-    public void deleteAll(Iterable<? extends User> entities) {
-
-    }
-
-    @Override
-    public void deleteAll() {
-
-    }
-
-    @Override
-    public Optional<User> findById(Long id) {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean existsById(Long aLong) {
-        return false;
-    }
-
-    @Override
-    public void flush() {
-
-    }
-
-    @Override
-    public <S extends User> S saveAndFlush(S entity) {
-        return null;
-    }
-
-    @Override
-    public <S extends User> List<S> saveAllAndFlush(Iterable<S> entities) {
-        return List.of();
-    }
-
-    @Override
-    public void deleteAllInBatch(Iterable<User> entities) {
-
-    }
-
-    @Override
-    public void deleteAllByIdInBatch(Iterable<Long> longs) {
-
-    }
-
-    @Override
-    public void deleteAllInBatch() {
-
-    }
-
-    @Override
-    public User getOne(Long aLong) {
-        return null;
-    }
-
-    @Override
-    public User getById(Long aLong) {
-        return null;
-    }
-
-    @Override
-    public User getReferenceById(Long aLong) {
-        return null;
-    }
-
-    @Override
-    public <S extends User> Optional<S> findOne(Example<S> example) {
-        return Optional.empty();
-    }
-
-    @Override
-    public <S extends User> List<S> findAll(Example<S> example) {
-        return List.of();
-    }
-
-    @Override
-    public <S extends User> List<S> findAll(Example<S> example, Sort sort) {
-        return List.of();
-    }
-
-    @Override
-    public <S extends User> Page<S> findAll(Example<S> example, Pageable pageable) {
-        return null;
-    }
-
-    @Override
-    public <S extends User> long count(Example<S> example) {
-        return 0;
-    }
-
-    @Override
-    public <S extends User> boolean exists(Example<S> example) {
-        return false;
-    }
-
-    @Override
-    public <S extends User, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
-        return null;
-    }
-
-    @Override
-    public List<User> findAll(Sort sort) {
-        return List.of();
-    }
-
-    @Override
-    public Page<User> findAll(Pageable pageable) {
-        return null;
-    }
 }

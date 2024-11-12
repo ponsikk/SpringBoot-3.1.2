@@ -3,11 +3,12 @@ package com.example.demo.controller;
 
 import com.example.demo.service.UserService;
 import com.example.demo.dto.UserDto;
-import com.example.demo.users.User;
+import com.example.demo.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -59,5 +60,12 @@ import org.springframework.web.bind.annotation.*;
         userService.deleteUser(id);
         return "redirect:/users";
     }
+
+    @GetMapping("/user")
+    public String viewUser(Model model, Authentication authentication) {
+        String username = authentication.getName();
+        userService.getUserByUsername(username).ifPresent(user -> model.addAttribute("user", user));
+        return "user";
+        }
 }
 
