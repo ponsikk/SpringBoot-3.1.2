@@ -54,6 +54,12 @@ public class User implements UserDetails {
         this.lastName = lastName;
         this.email = email;
     }
+    public User(String name, String lastName, String email, String password) {
+        this.firstName = name;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;  // Инициализация пароля
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
