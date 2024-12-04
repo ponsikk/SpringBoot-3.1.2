@@ -1,7 +1,8 @@
 package com.example.demo.controller;
 import com.example.demo.model.User;
 import com.example.demo.service.RoleService;
-import com.example.demo.service.impl.UserServiceImp;
+import com.example.demo.service.RoleServiceImp;
+import com.example.demo.service.UserServiceImp;
 
 import com.example.demo.util.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,10 @@ public class AdminController {
 
     private final UserServiceImp userService;
     private final UserValidator userValidator;
-    private final RoleService roleService;
+    private final RoleServiceImp roleService;
 
     @Autowired
-    public AdminController(UserServiceImp userService, UserValidator userValidator, RoleService roleService) {
+    public AdminController(UserServiceImp userService, UserValidator userValidator, RoleServiceImp roleService) {
         this.userService = userService;
         this.userValidator = userValidator;
         this.roleService = roleService;
